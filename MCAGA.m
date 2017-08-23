@@ -1,6 +1,6 @@
-function [L,S,iter,obj] = MCAGA(X,tol,maxIter)
+function [L,S,iter,cost] = MCAGA(X,tol,maxIter)
 % Group Algebra Matrix Completion
-%   solve min_L |L|_* s.t. L+S=X, Proj(S)=0
+%   solve min_L |L|_* s.t. L+S=X, Pi(S)=0
 %   using the inexact augmented Lagrangian method (IALM)
 % ----------------------------------
 % Chia-An Yu
@@ -9,12 +9,12 @@ function [L,S,iter,obj] = MCAGA(X,tol,maxIter)
 % Copyright: Music and Audio Computing Lab, Academia Sinica, Taiwan
 % 
 
-%% Parameters
+% Parameters
 muScale = 0.0001;
 rho0 = 1.2172;
 rho1 = 1.8588;
 
-%% Initialization
+% Initialization
 absAGA = @(x) norm(x(:),2);
 ST = @(x,c) max(1-c/norm(x(:)),0)*x;
 
@@ -32,13 +32,14 @@ lambda = zeros(size(X));
 omega = logical(X);
 rho = rho0+rho1*nnz(omega)/numel(omega); % from Lin et al. (2009)
 
-for k = 3: D2, X = fft(X,[],k); end     % move to the frequency domain
+for k = 3:D2, X = fft(X,[],k); end     % move to the frequency domain
 for i = 1:G, sv(1,1,i) = svds(X(:,:,i),1,'L'); end
 X_fro = norm(X(:));
 mu = muScale*absAGA(sv(1,1,:));
 
+conv = false;
 for iter = 1:maxIter
-    %% Update L, singular value-thresholding
+    % Update L, singular value thresholding
     Z = X-S+lambda/mu;
     for i = 1:G
         [U(:,:,i),Sigma(:,:,i),V(:,:,i)] = svd(Z(:,:,i),'econ');
@@ -50,33 +51,34 @@ for iter = 1:maxIter
     for i = 1:G
         L(:,:,i) = U(:,:,i)*spdiags(sv(:,1,i),0,P,P)*V(:,:,i)';
     end
-
-    %% Update S, masking in data domain
+    
+    % Update S, masking in data domain
     S = X-L+lambda/mu;
-    for k = 3:D2, S = ifft(S, [], k); end
+    for k = 3:D2, S = ifft(S,[],k); end
     err = sum(abs(S(omega)));
-    S = S.*(~omega);
-    for k = 3:D2, S = fft(S, [], k); end
-	
+	S(omega) = 0;
+    for k = 3:D2, S = fft(S,[],k); end
+    
     R = X-L-S;
     lambda = lambda+mu*R;
     mu = rho*mu;
-	
-    %% Check for convergence
-    obj = 0;
-    for i=1:P
-        obj = obj+absAGA(sv(i,1,:));
+    
+    % Check for convergence
+    cost = 0;
+    for i = 1:P
+        cost = cost+absAGA(sv(i,1,:));
     end
-    fprintf('#Iter.%2d: Res.=%f, |L|_*=%f, |Proj(S)|_1=%f\n',...
-                iter,norm(R(:))/X_fro,obj,err);
+    fprintf('#Iter.%2d: Res.=%f, |L|_*=%f, |Pi(S)|_1=%f\n',...
+                iter,norm(R(:))/X_fro,cost,err);
     if norm(R(:))/X_fro<tol
+        conv = true;
         break;
     end
 end
-if norm(R(:))/X_fro>=tol
+if conv==false
     warning('Maximum iterations exceeded.');
 end
-for k = 3: D2 % back to the data domain
+for k = 3:D2 % back to the data domain
     S = ifft(S, [], k);
     L = ifft(L, [], k);
 end
