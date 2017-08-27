@@ -37,7 +37,6 @@ for i = 1:G, sv(1,1,i) = svds(X(:,:,i),1,'L'); end
 X_fro = norm(X(:));
 mu = muScale*absAGA(sv(1,1,:));
 
-conv = false;
 for iter = 1:maxIter
     % Update L, singular value thresholding
     Z = X-S+lambda/mu;
@@ -56,7 +55,7 @@ for iter = 1:maxIter
     S = X-L+lambda/mu;
     for k = 3:D2, S = ifft(S,[],k); end
     err = sum(abs(S(omega)));
-	S(omega) = 0;
+    S(omega) = 0;
     for k = 3:D2, S = fft(S,[],k); end
     
     R = X-L-S;
@@ -71,12 +70,10 @@ for iter = 1:maxIter
     fprintf('#Iter.%2d: Res.=%f, |L|_*=%f, |Pi(S)|_1=%f\n',...
                 iter,norm(R(:))/X_fro,cost,err);
     if norm(R(:))/X_fro<tol
-        conv = true;
         break;
+    elseif iter==maxIter
+        warning('Maximum iterations exceeded.');
     end
-end
-if conv==false
-    warning('Maximum iterations exceeded.');
 end
 for k = 3:D2 % back to the data domain
     S = ifft(S, [], k);
