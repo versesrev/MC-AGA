@@ -33,7 +33,9 @@ omega = logical(X);
 rho = rho0+rho1*nnz(omega)/numel(omega); % from Lin et al. (2009)
 
 for k = 3:D2, X = fft(X,[],k); end     % move to the frequency domain
-for i = 1:G, sv(1,1,i) = svds(X(:,:,i),1,'L'); end
+for i = 1:G
+    sv(1,1,i) = svds(X(:,:,i),1,'L');
+end
 X_fro = norm(X(:));
 mu = muScale*absAGA(sv(1,1,:));
 
@@ -76,10 +78,9 @@ for iter = 1:maxIter
     end
 end
 for k = 3:D2 % back to the data domain
-    S = ifft(S, [], k);
-    L = ifft(L, [], k);
+    S = ifft(S,[],k);
+    L = ifft(L,[],k);
 end
 S = real(S);
 L = real(L);
-return
 end
