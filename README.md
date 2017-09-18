@@ -6,4 +6,4 @@ This repository contains:
 
 1. Proof of theorems in the paper.
 
-2. MATLAB code of MC-AGA, the algorithm proposed in the paper, and a simple demostration.
+2. MATLAB code of MC-AGA, the algorithm proposed in the paper, and a simple demonstration.
