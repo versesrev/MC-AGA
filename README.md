@@ -6,7 +6,7 @@ This repository contains:
 
 1. Appendix.pdf: Proof of theorems in the paper.
 
-2. MCAGA.m: MATLAB code of MC-AGA, the algorithm proposed in the paper.
+2. MCAGA.m: A MATLAB implementation of MC-AGA, the algorithm proposed in the paper.
 
 3. demo.m: A simple demonstration of MC-AGA on a random matrix.
 
