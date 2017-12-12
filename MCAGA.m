@@ -37,7 +37,7 @@ for i = 1:G
     sv(1,1,i) = svds(X(:,:,i),1,'L');
 end
 X_fro = norm(X(:));
-mu = muScale*absAGA(sv(1,1,:));
+mu = muScale/absAGA(sv(1,1,:));
 
 for iter = 1:maxIter
     % Update L, singular value thresholding
