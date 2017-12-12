@@ -1,4 +1,4 @@
-function [L,S,iter,cost] = MCAGA(X,tol,maxIter)
+function [L,S,iter,cost] = MCAGA(X,tol,maxIter,muScale)
 % Group Algebra Matrix Completion
 %   solve min_L |L|_* s.t. L+S=X, Pi(S)=0
 %   using the inexact augmented Lagrangian method (IALM)
@@ -10,7 +10,15 @@ function [L,S,iter,cost] = MCAGA(X,tol,maxIter)
 % 
 
 % Parameters
-muScale = 0.0001;
+if nargin<2
+    tol = 1e-7;
+end
+if nargin<3
+    maxIter = 1000;
+end
+if nargin<4
+    muScale = 0.0001;
+end
 rho0 = 1.2172;
 rho1 = 1.8588;
 
